@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 futures = "*"
 libc = "*"
+byteorder = "*"
 
 [dev-dependencies]
 release = "*"

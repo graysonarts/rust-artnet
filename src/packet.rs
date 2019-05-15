@@ -1,6 +1,8 @@
 use crate::r#async::FromRaw;
 
 const ARTNET_SIGNATURE: &str = "Art-Net";
+const OPCODE_LOCATION: usize = 8;
+const VERSION_LOCATION: usize = 11;
 
 #[repr(u16)]
 #[derive(Debug, PartialEq)]
@@ -17,14 +19,16 @@ impl From<u16> for Opcode {
 		match i {
 			0x2000 => OpPoll,
 			0x2100 => OpPollReply,
-			_ => Unknown,
+			_ => { println!("{:x?}", i); Unknown },
 		}
 	}
 }
 
-pub struct Packet {}
+pub struct Packet {
+	opcode: Opcode,
+}
 
-fn validate_signature(data: &[u8]) -> Option<usize> {
+fn validate_signature(data: &[u8]) -> Option<()> {
 		let signature_expected_length = ARTNET_SIGNATURE.len() + 1;
     let signature = &data[..signature_expected_length];
     let is_valid = signature
@@ -35,22 +39,41 @@ fn validate_signature(data: &[u8]) -> Option<usize> {
         && data[signature_expected_length] == 0;
 
     if is_valid {
-        Some(signature_expected_length + 1)
+        Some(())
     } else {
         None
     }
 }
 
-fn get_opcode(data: &[u8]) -> Option<Opcode> {
-	Some(Opcode::from(u16::from(data[0]) | u16::from(data[1]) << 8))
+fn validate_version(data: &[u8]) -> Option<()> {
+	let offset_data = &data[VERSION_LOCATION..];
+	let version = read_little_endian(offset_data);
+	println!("version = {:x?}/{:?}", version, version);
+	if version == 14 {
+		Some(())
+	} else {
+		None
+	}
+}
+
+fn read_little_endian(data: &[u8]) -> u16 {
+	use std::io::Cursor;
+	use byteorder::{LittleEndian, ReadBytesExt};
+	let mut rdr = Cursor::new(data);
+
+	rdr.read_u16::<LittleEndian>().unwrap()
 }
 
 impl FromRaw<Packet> for Packet {
     fn from_raw(data: &[u8]) -> Option<Packet> {
-        let position = validate_signature(data)?;
-				let remaining = &data[position..];
+        validate_signature(data)?;
+				validate_version(data)?;
+				let remaining = &data[OPCODE_LOCATION..];
+				let opcode = Opcode::from(read_little_endian(remaining));
 
-        None
+        Some(Packet {
+					opcode
+				})
     }
 }
 
@@ -62,13 +85,24 @@ mod tests {
 
     #[test]
     fn test_valid_signature() {
-        assert_eq!(validate_signature(&PACKET), Some(9));
+        assert_eq!(validate_signature(&PACKET), Some(()));
     }
+
+		#[test]
+		fn test_valid_version() {
+			assert_eq!(validate_version(&PACKET), Some(()));
+		}
 
 		#[test]
 		fn test_op_code_detection() {
 			let remaining = &PACKET[8..];
-			let op_code = get_opcode(remaining).expect("Unable to get opcode");
-			assert_eq!(op_code, Opcode::OpPoll);
+			let op_code = read_little_endian(remaining);
+			assert_eq!(op_code, Opcode::OpPoll as u16);
+		}
+
+		#[test]
+		fn test_packet_generation() {
+			let packet = Packet::from_raw(&PACKET).expect("Unable to create packet");
+			assert_eq!(packet.opcode, Opcode::OpPoll);
 		}
 }
