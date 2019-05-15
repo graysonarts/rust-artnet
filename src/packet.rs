@@ -3,11 +3,23 @@ use crate::r#async::FromRaw;
 const ARTNET_SIGNATURE: &str = "Art-Net";
 
 #[repr(u16)]
+#[derive(Debug, PartialEq)]
 enum Opcode {
     OpPoll = 0x2000,
     OpPollReply = 0x2100,
 
     Unknown = 0xFFFF,
+}
+
+impl From<u16> for Opcode {
+	fn from(i: u16) -> Opcode {
+		use Opcode::*;
+		match i {
+			0x2000 => OpPoll,
+			0x2100 => OpPollReply,
+			_ => Unknown,
+		}
+	}
 }
 
 pub struct Packet {}
@@ -29,9 +41,14 @@ fn validate_signature(data: &[u8]) -> Option<usize> {
     }
 }
 
+fn get_opcode(data: &[u8]) -> Option<Opcode> {
+	Some(Opcode::from(u16::from(data[0]) | u16::from(data[1]) << 8))
+}
+
 impl FromRaw<Packet> for Packet {
     fn from_raw(data: &[u8]) -> Option<Packet> {
-        validate_signature(data)?;
+        let position = validate_signature(data)?;
+				let remaining = &data[position..];
 
         None
     }
@@ -47,4 +64,11 @@ mod tests {
     fn test_valid_signature() {
         assert_eq!(validate_signature(&PACKET), Some(9));
     }
+
+		#[test]
+		fn test_op_code_detection() {
+			let remaining = &PACKET[8..];
+			let op_code = get_opcode(remaining).expect("Unable to get opcode");
+			assert_eq!(op_code, Opcode::OpPoll);
+		}
 }
