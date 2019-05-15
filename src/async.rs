@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use std::net::{ToSocketAddrs, UdpSocket};
 
-pub(super) trait FromRaw<T> {
+pub(crate) trait FromRaw<T> {
     fn from_raw(raw: &[u8]) -> Option<T>;
 }
 
@@ -42,7 +42,7 @@ where
         })
     }
 
-		/// Note: This is blocking for now
+    /// Note: This is blocking for now
     pub fn poll(&mut self) -> Result<T, AsyncError> {
         let (bytes_read, addr) = self
             .socket
@@ -52,7 +52,7 @@ where
 
         let slice = &self.cache[..bytes_read];
         println!("{:?}", slice);
-				T::from_raw(slice).map_or(Err(AsyncError::GeneralError), |s| Ok(s))
+        T::from_raw(slice).map_or(Err(AsyncError::GeneralError), |s| Ok(s))
     }
 }
 
