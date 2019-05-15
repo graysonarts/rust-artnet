@@ -12,17 +12,18 @@ enum Opcode {
 
 pub struct Packet {}
 
-fn validate_signature(data: &[u8]) -> Option<()> {
-    let signature = &data[..9];
+fn validate_signature(data: &[u8]) -> Option<usize> {
+		let signature_expected_length = ARTNET_SIGNATURE.len() + 1;
+    let signature = &data[..signature_expected_length];
     let is_valid = signature
         .iter()
         .zip(ARTNET_SIGNATURE.as_bytes().iter())
         .map(|(l, r)| l == r)
         .fold(true, |acc, x| acc && x)
-        && data[8] == 0;
+        && data[signature_expected_length] == 0;
 
     if is_valid {
-        Some(())
+        Some(signature_expected_length + 1)
     } else {
         None
     }
@@ -44,6 +45,6 @@ mod tests {
 
     #[test]
     fn test_valid_signature() {
-        assert_eq!(validate_signature(&PACKET), Some(()));
+        assert_eq!(validate_signature(&PACKET), Some(9));
     }
 }
