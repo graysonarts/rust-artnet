@@ -1,21 +1,14 @@
 mod r#async;
+mod packet;
 
-#[repr(u16)]
-enum Opcode {
-    OpPoll = 0x2000,
-    OpPollReply = 0x2100,
-
-    Unknown = 0xFFFF,
-}
-
-pub struct Packet {}
+use packet::Packet;
 
 pub struct Controller {}
 
 pub struct Node {}
 
 impl Responder for Node {
-    fn on_art_poll(&self, packet: Packet) -> Result<(), ()> {
+    fn on_art_poll(&self, _packet: Packet) -> Result<(), ()> {
         Err(())
     }
 }
