@@ -17,7 +17,7 @@ impl FromRaw<Packet> for Packet {
 			Opcode::OpPoll => None,
 			Opcode::OpPollReply => None,
 
-			_ => None
+			_ => None,
 		}
 	}
 }

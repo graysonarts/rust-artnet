@@ -10,6 +10,7 @@ edition = "2018"
 futures = "*"
 libc = "*"
 byteorder = "*"
+bitfield = "*"
 
 [dev-dependencies]
 release = "*"
