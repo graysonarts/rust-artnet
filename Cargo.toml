@@ -13,3 +13,4 @@ byteorder = "*"
 
 [dev-dependencies]
 release = "*"
+rusty-hook = "*"
