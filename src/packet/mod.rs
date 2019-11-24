@@ -13,12 +13,16 @@ impl FromRaw<Packet> for Packet {
 		use header::Opcode;
 
 		let hdr = header::Header::from_raw(raw)?;
-		match hdr.opcode {
-			Opcode::OpPoll => None,
+		let payload = match hdr.opcode {
+			Opcode::OpPoll => op_poll::OpPoll::from_raw(raw),
 			Opcode::OpPollReply => None,
 
 			_ => None,
-		}
+		};
+
+		Some(Packet{
+			header: hdr,
+		})
 	}
 }
 
@@ -41,5 +45,10 @@ mod tests {
 		let remaining = &PACKET[8..];
 		let op_code = read_little_endian(remaining);
 		assert_eq!(op_code, 0x2000);
+	}
+
+	#[test]
+	fn test_from_raw() {
+		let packet = Packet::from_raw(&PACKET).expect("Unable to parse packet");
 	}
 }
