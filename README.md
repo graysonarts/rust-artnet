@@ -8,9 +8,45 @@
 
 ## TODO:
 
-[] Peer <-> Peer communication
-[] ArtPollRequest
-[] ArtPollReply
-[] ArtDmx
-[] Controller <-> Peer communication
-[]
+### High Levels
+
+[ ] Peer <-> Peer communication
+[ ] Controller <-> Peer communication
+[ ] Immediate Mode
+[ ] Synchronous Mode
+[ ] DMX
+[ ] VLC
+[ ] RDM
+
+### Packets
+
+[ ] ArtPoll
+[ ] ArtPollReply
+[ ] ArtIpProg
+[ ] ArtIpProgReply
+[ ] ArtAddress
+[ ] ArtDiagData
+[ ] ArtTimecode
+[ ] ArtCommand
+[ ] ArtTrigger
+[ ] ArtDmx
+[ ] ArtSync
+[ ] ArtNzs
+[ ] ArtInput
+
+### VLC support
+
+[ ] ArtVlc
+
+### RDM support
+
+[ ] ArtTodRequest
+[ ] ArtTodData
+[ ] ArtTodControl
+[ ] ArtRdm
+[ ] ArtRdmSub
+
+### May or May not support
+
+[ ] ArtFirmwareMaster
+[ ] ArtFirmwareReply
